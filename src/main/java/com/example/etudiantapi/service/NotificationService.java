@@ -3,8 +3,16 @@ package com.example.etudiantapi.service;
 import com.example.etudiantapi.entity.Etudiant;
 import com.example.etudiantapi.util.LanguageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 
+import java.util.Map;
+import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,8 +25,10 @@ public class NotificationService {
     @Autowired
     private LanguageUtil languageUtil;
 
-    @Autowired
-    private EmailService emailService;
+    @Value("${notification.service.base-url}")
+    private String notificationServiceBaseUrl;
+
+    private final RestTemplate restTemplate = new RestTemplate();
 
     public enum NotificationType {
         CREATION, MODIFICATION, SUPPRESSION
@@ -43,8 +53,8 @@ public class NotificationService {
 
                 LOGGER.info("===== RESULTATS NOTIFICATIONS =====");
                 LOGGER.info("EMAIL: " + (emailSent ? "ENVOYE AVEC SUCCES" : "ECHEC"));
-                LOGGER.info("SMS: " + (smsSent ? "ENVOYE AVEC SUCCES (SIMULATION)" : "ECHEC"));
-                LOGGER.info("PUSH: " + (pushSent ? "ENVOYE AVEC SUCCES (SIMULATION)" : "ECHEC"));
+                LOGGER.info("SMS: " + (smsSent ? "ENVOYE AVEC SUCCES" : "ECHEC"));
+                LOGGER.info("PUSH: " + (pushSent ? "ENVOYE AVEC SUCCES" : "ECHEC"));
                 LOGGER.info("=====================================");
 
                 return emailSent || smsSent || pushSent;
@@ -63,11 +73,11 @@ public class NotificationService {
 
             switch (channel) {
                 case EMAIL:
-                    return sendRealEmail(etudiant.getEmail(), subject, message);
+                    return sendEmail(etudiant.getEmail(), subject, message);
                 case SMS:
                     return sendSMS(etudiant.getTelephone(), message);
                 case PUSH:
-                    return sendPushNotification(etudiant.getId().toString(), message);
+                    return sendPushNotification(etudiant.getId().toString(), subject, message);
                 default:
                     LOGGER.warning("Canal de notification non supporte: " + channel);
                     return false;
@@ -78,19 +88,115 @@ public class NotificationService {
         }
     }
 
-    private boolean sendRealEmail(String email, String subject, String message) {
-        if (emailService.isEmailConfigured()) {
-            // Envoi d'un vrai email
-            return emailService.sendEmail(email, subject, message);
-        } else {
-            // Fallback vers simulation si pas configuré
-            LOGGER.info("===== SIMULATION EMAIL (pas de config SMTP) =====");
-            LOGGER.info("Destinataire: " + email);
-            LOGGER.info("Sujet: " + subject);
-            LOGGER.info("Message: " + message);
-            LOGGER.info("Pour recevoir de vrais emails, configurez SMTP dans application.properties");
-            LOGGER.info("================================================");
-            return true;
+    private boolean sendEmail(String email, String subject, String message) {
+        try {
+            String url = notificationServiceBaseUrl + "/api/v2/notifications/email";
+            
+            Map<String, String> emailRequest = new HashMap<>();
+            emailRequest.put("to", email);
+            emailRequest.put("subject", subject);
+            emailRequest.put("text", message);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, String>> request = new HttpEntity<>(emailRequest, headers);
+
+            ResponseEntity<Map> response = restTemplate.postForEntity(url, request, Map.class);
+            
+            if (response.getStatusCode().is2xxSuccessful()) {
+                Map<String, Object> responseBody = response.getBody();
+                boolean success = (Boolean) responseBody.get("success");
+                String responseMessage = (String) responseBody.get("message");
+                
+                LOGGER.info("===== EMAIL RESPONSE =====");
+                LOGGER.info("Success: " + success);
+                LOGGER.info("Message: " + responseMessage);
+                LOGGER.info("============================");
+                
+                return success;
+            } else {
+                LOGGER.warning("Email service responded with error: " + response.getStatusCode());
+                return false;
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'envoi d'email via API externe", e);
+            return false;
+        }
+    }
+
+    private boolean sendSMS(String telephone, String message) {
+        if (telephone == null || telephone.trim().isEmpty()) {
+            LOGGER.warning("Numero de telephone non fourni pour l'envoi de SMS");
+            return false;
+        }
+
+        try {
+            String url = notificationServiceBaseUrl + "/api/v2/notifications/sms";
+            
+            Map<String, String> smsRequest = new HashMap<>();
+            smsRequest.put("phoneNumber", telephone);
+            smsRequest.put("message", message);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, String>> request = new HttpEntity<>(smsRequest, headers);
+
+            ResponseEntity<Map> response = restTemplate.postForEntity(url, request, Map.class);
+            
+            if (response.getStatusCode().is2xxSuccessful()) {
+                Map<String, Object> responseBody = response.getBody();
+                boolean success = (Boolean) responseBody.get("success");
+                String responseMessage = (String) responseBody.get("message");
+                
+                LOGGER.info("===== SMS RESPONSE =====");
+                LOGGER.info("Success: " + success);
+                LOGGER.info("Message: " + responseMessage);
+                LOGGER.info("=========================");
+                
+                return success;
+            } else {
+                LOGGER.warning("SMS service responded with error: " + response.getStatusCode());
+                return false;
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'envoi de SMS via API externe", e);
+            return false;
+        }
+    }
+
+    private boolean sendPushNotification(String userId, String title, String message) {
+        try {
+            String url = notificationServiceBaseUrl + "/api/v2/notifications/push";
+            
+            Map<String, String> pushRequest = new HashMap<>();
+            pushRequest.put("userId", userId);
+            pushRequest.put("title", title);
+            pushRequest.put("message", message);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, String>> request = new HttpEntity<>(pushRequest, headers);
+
+            ResponseEntity<Map> response = restTemplate.postForEntity(url, request, Map.class);
+            
+            if (response.getStatusCode().is2xxSuccessful()) {
+                Map<String, Object> responseBody = response.getBody();
+                boolean success = (Boolean) responseBody.get("success");
+                String responseMessage = (String) responseBody.get("message");
+                
+                LOGGER.info("===== PUSH NOTIFICATION RESPONSE =====");
+                LOGGER.info("Success: " + success);
+                LOGGER.info("Message: " + responseMessage);
+                LOGGER.info("=====================================");
+                
+                return success;
+            } else {
+                LOGGER.warning("Push notification service responded with error: " + response.getStatusCode());
+                return false;
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'envoi de notification push via API externe", e);
+            return false;
         }
     }
 
@@ -124,28 +230,5 @@ public class NotificationService {
                 messageTemplate = "Bonjour %s %s,\n\nNotification concernant votre dossier etudiant.\n\nContact: %s\n\nCordialement,\nL'equipe de gestion des etudiants";
                 return String.format(messageTemplate, etudiant.getPrenom(), etudiant.getNom(), etudiant.getEmail());
         }
-    }
-
-    private boolean sendSMS(String telephone, String message) {
-        if (telephone == null || telephone.trim().isEmpty()) {
-            LOGGER.warning("Numero de telephone non fourni pour l'envoi de SMS");
-            return false;
-        }
-
-        LOGGER.info("===== SIMULATION SMS =====");
-        LOGGER.info("Destinataire: " + telephone);
-        LOGGER.info("Message: " + message);
-        LOGGER.info("SMS simule envoye avec succes !");
-        LOGGER.info("===========================");
-        return true;
-    }
-
-    private boolean sendPushNotification(String userId, String message) {
-        LOGGER.info("===== SIMULATION NOTIFICATION PUSH =====");
-        LOGGER.info("Utilisateur: " + userId);
-        LOGGER.info("Message: " + message);
-        LOGGER.info("Notification push simulee envoyee avec succes !");
-        LOGGER.info("======================================");
-        return true;
     }
 }

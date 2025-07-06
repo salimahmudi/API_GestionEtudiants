@@ -1,0 +1,52 @@
+### Variables
+@baseUrl = http://localhost:8080/etudiant-notification-api/api/v1
+@contentType = application/json
+
+### Récupérer tous les étudiants
+GET {{baseUrl}}/etudiants?lang=fr
+Accept: {{contentType}}
+
+### Créer un nouvel étudiant
+POST {{baseUrl}}/etudiants?lang=fr
+Content-Type: {{contentType}}
+
+{
+    "nom": "Dupont",
+    "prenom": "Jean",
+    "email": "jean.dupont@email.com",
+    "dateNaissance": "1995-05-15",
+    "niveau": "Master 1",
+    "telephone": "0123456789"
+}
+
+### Récupérer un étudiant par ID
+GET {{baseUrl}}/etudiants/1?lang=fr
+Accept: {{contentType}}
+
+### Mettre à jour un étudiant
+PUT {{baseUrl}}/etudiants/1?lang=fr
+Content-Type: {{contentType}}
+
+{
+    "nom": "Dupont",
+    "prenom": "Jean-Pierre",
+    "email": "jean-pierre.dupont@email.com",
+    "dateNaissance": "1995-05-15",
+    "niveau": "Master 2",
+    "telephone": "0123456789"
+}
+
+### Rechercher par email
+GET {{baseUrl}}/etudiants/search?email=jean.dupont@email.com&lang=fr
+Accept: {{contentType}}
+
+### Rechercher par niveau
+GET {{baseUrl}}/etudiants/search?niveau=Master 1&lang=fr
+Accept: {{contentType}}
+
+### Compter les étudiants
+GET {{baseUrl}}/etudiants/count
+Accept: {{contentType}}
+
+### Supprimer un étudiant
+DELETE {{baseUrl}}/etudiants/1?lang=fr

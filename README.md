@@ -1,191 +1,268 @@
-# API de Gestion des Étudiants avec Service de Notifications
+# 🎓 API de Gestion des Étudiants avec Service de Notifications
 
-## Description
+<div align="center">
 
-Cette API RESTful permet la gestion complète des étudiants avec un système de notifications intégré. Elle est développée en Java EE et offre les fonctionnalités suivantes :
+![Java](https://img.shields.io/badge/Java-11+-orange?style=for-the-badge&logo=java)
+![Java EE](https://img.shields.io/badge/Java%20EE-8-blue?style=for-the-badge&logo=java)
+![Maven](https://img.shields.io/badge/Maven-3.6+-red?style=for-the-badge&logo=apache-maven)
+![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 
-- **CRUD complet** sur l'entité Étudiant
-- **Service de notifications** automatiques (email, SMS, push)
-- **Support multilingue** (français, anglais)
-- **Gestion robuste des erreurs**
-- **Versioning des APIs**
-- **Documentation OpenAPI/Swagger**
+*Une API RESTful complète pour la gestion des étudiants avec système de notifications intégré*
 
-## Architecture
+</div>
 
-Le projet suit une architecture en couches avec les composants suivants :
+---
 
+## 📋 Table des Matières
+
+- [🎯 Description](#-description)
+- [🏗️ Architecture](#️-architecture)
+- [🛠️ Technologies](#️-technologies)
+- [⚡ Installation](#-installation)
+- [🚀 Utilisation](#-utilisation)
+- [📧 Service de Notifications](#-service-de-notifications)
+- [🌐 Support Multilingue](#-support-multilingue)
+- [❌ Gestion des Erreurs](#-gestion-des-erreurs)
+- [📚 Documentation API](#-documentation-api)
+- [🔒 Sécurité](#-sécurité)
+- [🧪 Tests](#-tests)
+- [📞 Support](#-support)
+
+---
+
+## 🎯 Description
+
+Cette API RESTful moderne permet une **gestion complète des étudiants** avec un système de notifications automatiques intégré. Développée avec Java EE 8, elle offre une solution robuste et scalable pour les institutions éducatives.
+
+### ✨ Fonctionnalités Principales
+
+- ✅ **CRUD complet** sur l'entité Étudiant
+- 📱 **Service de notifications** automatiques (Email, SMS, Push)
+- 🌍 **Support multilingue** (Français, Anglais)
+- 🛡️ **Gestion robuste des erreurs**
+- 📊 **Versioning des APIs**
+- 📖 **Documentation OpenAPI/Swagger**
+- 🔍 **Recherche avancée**
+- ⚡ **Traitement asynchrone**
+
+---
+
+## 🏗️ Architecture
+
+Le projet suit une **architecture en couches** claire et maintenable :
+
+```
 EtudiantNotificationAPI/
-- **config/** # Configuration de l'application
-- **controller/** # Contrôleurs REST
-- **dto/** # Objets de transfert de données
-- **entity/** # Entités JPA
-- **repository/** # Couche d'accès aux données
-- **service/** # Logique métier
-- **exception/** # Gestion des exceptions
-- **util/** # Utilitaires (internationalisation)
+├── 📁 config/          # Configuration de l'application
+├── 📁 controller/      # Contrôleurs REST (JAX-RS)
+├── 📁 dto/            # Objets de transfert de données
+├── 📁 entity/         # Entités JPA/Hibernate
+├── 📁 repository/     # Couche d'accès aux données
+├── 📁 service/        # Logique métier et services
+├── 📁 exception/      # Gestion centralisée des exceptions
+├── 📁 util/          # Utilitaires (internationalisation)
+└── 📁 resources/     # Fichiers de configuration et messages
+```
 
-## Technologies Utilisées
+### 🔄 Flux de Données
 
-- **Java EE 8** - Framework principal
-- **JAX-RS** - Services REST
-- **JPA/Hibernate** - Persistance des données
-- **CDI** - Injection de dépendances
-- **Bean Validation** - Validation des données
-- **MicroProfile OpenAPI** - Documentation API
-- **H2 Database** - Base de données (développement)
-- **Maven** - Gestion des dépendances
+```
+Client HTTP → Controller Layer → Service Layer → Repository Layer → Database
+                    ↓
+            Notification Service → Email/SMS/Push
+```
 
-## Installation et Déploiement
+---
 
-### Prérequis
+## 🛠️ Technologies
 
-- Java 11 ou supérieur
-- Maven 3.6+
-- Serveur d'application Java EE (WildFly, Payara, etc.)
+| Technologie | Version | Usage |
+|-------------|---------|-------|
+| **Java EE** | 8 | Framework principal |
+| **JAX-RS** | 2.1 | Services REST |
+| **JPA/Hibernate** | 2.2 | Persistance des données |
+| **CDI** | 2.0 | Injection de dépendances |
+| **Bean Validation** | 2.0 | Validation des données |
+| **MicroProfile OpenAPI** | 1.1 | Documentation API |
+| **H2 Database** | 1.4 | Base de données (développement) |
+| **Maven** | 3.6+ | Gestion des dépendances |
 
-### Compilation
-mvn clean compile
+---
 
-### Tests
-mvn test
+## ⚡ Installation
 
-### Packaging
-mvn clean package
+### 📋 Prérequis
 
+- ☕ **Java 11** ou supérieur
+- 📦 **Maven 3.6+**
+- 🖥️ **Serveur d'application Java EE** (WildFly, Payara, GlassFish)
 
-### Messages Multilingues
+### 🔧 Étapes d'Installation
 
-Les messages sont configurés dans les fichiers :
-- \`messages_fr.properties\` (français)
-- \`messages_en.properties\` (anglais)
+1. **Cloner le repository**
+   ```bash
+   git clone https://github.com/salimahmudi/etudiant-notification-api.git
+   cd etudiant-notification-api
+   ```
 
-## Utilisation de l'API
+2. **Compilation**
+   ```bash
+   mvn clean compile
+   ```
 
-### Endpoints Principaux
+3. **Exécution des tests**
+   ```bash
+   mvn test
+   ```
 
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
-| GET | \`/v1/etudiants\` | Récupérer tous les étudiants |
-| GET | \`/v1/etudiants/{id}\` | Récupérer un étudiant par ID |
-| POST | \`/v1/etudiants\` | Créer un nouvel étudiant |
-| PUT | \`/v1/etudiants/{id}\` | Mettre à jour un étudiant |
-| DELETE | \`/v1/etudiants/{id}\` | Supprimer un étudiant |
-| GET | \`/v1/etudiants/search\` | Rechercher des étudiants |
-| GET | \`/v1/etudiants/count\` | Compter les étudiants |
+4. **Packaging**
+   ```bash
+   mvn clean package
+   ```
 
-### Exemples d'Utilisation
+5. **Déploiement**
+   ```bash
+   # Copier le fichier WAR généré vers votre serveur d'application
+   cp target/etudiant-notification-api.war $WILDFLY_HOME/standalone/deployments/
+   ```
 
-#### Créer un étudiant
+### 🗂️ Configuration des Messages
+
+Les messages multilingues sont configurés dans :
+
+```
+src/main/resources/
+├── messages_fr.properties  # Messages en français
+└── messages_en.properties  # Messages en anglais
+```
+
+---
+
+## 🚀 Utilisation
+
+### 🛣️ Endpoints Principaux
+
+| Méthode | Endpoint | Description | Statut |
+|---------|----------|-------------|--------|
+| `GET` | `/v1/etudiants` | Récupérer tous les étudiants | ✅ |
+| `GET` | `/v1/etudiants/{id}` | Récupérer un étudiant par ID | ✅ |
+| `POST` | `/v1/etudiants` | Créer un nouvel étudiant | ✅ |
+| `PUT` | `/v1/etudiants/{id}` | Mettre à jour un étudiant | ✅ |
+| `DELETE` | `/v1/etudiants/{id}` | Supprimer un étudiant | ✅ |
+| `GET` | `/v1/etudiants/search` | Rechercher des étudiants | ✅ |
+| `GET` | `/v1/etudiants/count` | Compter les étudiants | ✅ |
+
+### 💡 Exemples d'Utilisation
+
+#### 📝 Créer un étudiant
+
+```bash
 curl -X POST http://localhost:8080/etudiant-notification-api/api/v1/etudiants \
   -H "Content-Type: application/json" \
+  -H "Accept-Language: fr" \
   -d '{
-    "nom": "test",
-    "prenom": "test",
-    "email": "test.test@email.com",
-    "dateNaissance": "1995-05-15",
+    "nom": "HAMMOUDI",
+    "prenom": "Salima",
+    "email": "salima.hammoudi@email.com",
+    "dateNaissance": "2003-03-27",
     "niveau": "Master 1",
     "telephone": "0123456789"
   }'
+```
 
-#### Récupérer tous les étudiants
-curl -X GET http://localhost:8080/etudiant-notification-api/api/v1/etudiants?lang=fr
+**Réponse :**
+```json
+{
+  "id": 1,
+  "nom": "HAMMOUDI",
+  "prenom": "Salima",
+  "email": "salima.hammoudi@email.com",
+  "dateNaissance": "2003-03-27",
+  "niveau": "Master 1",
+  "telephone": "0123456789",
+  "dateCreation": "2025-01-15T10:30:00Z"
+}
+```
 
+#### 📋 Récupérer tous les étudiants
 
-#### Rechercher par email
-curl -X GET "http://localhost:8080/etudiant-notification-api/api/v1/etudiants/search?email=jean.dupont@email.com"
+```bash
+curl -X GET "http://localhost:8080/etudiant-notification-api/api/v1/etudiants?lang=fr&page=0&size=10"
+```
 
+#### 🔍 Rechercher par email
 
-### Support Multilingue
+```bash
+curl -X GET "http://localhost:8080/etudiant-notification-api/api/v1/etudiants/search?email=salima.hammoudi@email.com&lang=fr"
+```
 
-Ajoutez le paramètre \`lang\` à vos requêtes :
-- \`lang=fr\` pour le français (par défaut)
-- \`lang=en\` pour l'anglais
+#### 📊 Obtenir le nombre d'étudiants
 
-## Service de Notifications
+```bash
+curl -X GET "http://localhost:8080/etudiant-notification-api/api/v1/etudiants/count"
+```
 
-Le service de notifications supporte plusieurs canaux :
+---
 
-- **Email** - Notifications par email
-- **SMS** - Messages texte
-- **Push** - Notifications push
+## 📧 Service de Notifications
 
-Les notifications sont envoyées automatiquement lors des opérations :
-- Création d'un étudiant
-- Modification d'un étudiant  
-- Suppression d'un étudiant
+Le service de notifications supporte **plusieurs canaux de communication** :
 
-### Configuration des Notifications
+### 📱 Canaux Supportés
 
-Les notifications sont envoyées de manière asynchrone pour ne pas bloquer les opérations principales. En cas d'échec du service de notification, l'opération sur l'étudiant reste valide.
+| Canal | Description | Statut |
+|-------|-------------|--------|
+| 📧 **Email** | Notifications par courrier électronique | ✅ Actif |
+| 📱 **SMS** | Messages texte | ✅ Actif |
+| 🔔 **Push** | Notifications push | 🚧 En développement |
 
-## Gestion des Erreurs
+### 🔄 Déclencheurs Automatiques
 
-L'API utilise un système de gestion d'erreurs centralisé avec :
+Les notifications sont envoyées automatiquement lors des opérations suivantes :
 
-- **Codes d'erreur standardisés**
-- **Messages multilingues**
-- **Détails des erreurs de validation**
-- **Logging complet**
+- ➕ **Création** d'un étudiant
+- ✏️ **Modification** d'un étudiant
+- 🗑️ **Suppression** d'un étudiant
 
-### Codes d'Erreur
+### ⚡ Traitement Asynchrone
 
-| Code | Type | Description |
-|------|------|-------------|
-| VALIDATION_001 | Validation | Erreurs de validation des données |
-| BUSINESS_001 | Métier | Violation des règles métier |
-| RESOURCE_001 | Ressource | Ressource non trouvée |
-| EXTERNAL_001 | Service externe | Service externe indisponible |
-| INTERNAL_001 | Interne | Erreur interne du serveur |
+```java
+@Asynchronous
+public void envoyerNotification(TypeNotification type, Etudiant etudiant) {
+    // Traitement asynchrone pour ne pas bloquer l'opération principale
+}
+```
 
-## Documentation API
+> **Note :** En cas d'échec du service de notification, l'opération sur l'étudiant reste valide.
 
-La documentation complète de l'API est disponible via OpenAPI/Swagger :
+---
 
-- **Spécification OpenAPI** : \`/openapi.yaml\`
-- **Interface Swagger UI** : Accessible via le serveur d'application
+## 🌐 Support Multilingue
 
-## Versioning
+### 🗣️ Langues Supportées
 
-L'API utilise un versioning par URL avec le préfixe \`/v1/\`. Les versions futures utiliseront \`/v2/\`, \`/v3/\`, etc.
+- 🇫🇷 **Français** (par défaut)
+- 🇬🇧 **Anglais**
 
-## Sécurité
+### 🔧 Utilisation
 
-### Authentification (À implémenter)
+Ajoutez le paramètre `lang` à vos requêtes :
 
-L'API est prête pour l'authentification JWT. Ajoutez votre implémentation d'authentification selon vos besoins.
+```bash
+# Français (par défaut)
+curl -X GET "http://localhost:8080/api/v1/etudiants?lang=fr"
 
-### Validation des Données
+# Anglais
+curl -X GET "http://localhost:8080/api/v1/etudiants?lang=en"
+```
 
-Toutes les données d'entrée sont validées avec Bean Validation :
-- Validation des formats (email, téléphone)
-- Validation des longueurs
-- Validation des champs obligatoires
+### 📝 Configuration des Messages
 
-## Monitoring et Logs
+```properties
+# messages_fr.properties
+etudiant.cree.succes=Étudiant créé avec succès
+etudiant.non.trouve=Étudiant non trouvé
 
-L'application utilise le logging Java standard avec différents niveaux :
-- **INFO** : Opérations normales
-- **WARNING** : Problèmes non critiques
-- **SEVERE** : Erreurs critiques
-
-## Tests
-
-### Tests Unitaires
-
-Exécutez les tests unitaires :
-mvn test
-
-### Tests d'Intégration
-
-Les tests d'intégration utilisent une base de données H2 en mémoire.
-
-
-## Licence
-
-Ce projet est sous licence MIT. Voir le fichier LICENSE pour plus de détails.
-
-## Support
-
-Pour toute question ou problème :
-- Email : salimahammoudi1@gmail.com
+# messages_en.properties
+etudiant.cree.succes=Student created successfully
+etudiant.non.trouve=Student not found
